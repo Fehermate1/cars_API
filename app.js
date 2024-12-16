@@ -4,14 +4,16 @@ import cors from "cors";
 import sqlite3 from "sqlite3";
 
 const app = express();
-app.listen(3020);
 app.use(bodyParser.json());
+const PORT = 3020
+app.listen(PORT);
+console.log(`The server is running on localhost:${PORT}`)
 
 const db = new sqlite3.Database(`./db.sqlite`);
 
 db.serialize(() => {
   db.run(
-    "CREATE TABLE IF NOT EXISTS cars (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, brand TEXT NOT NULL, model TEXT, color TEXT, year INTEGER);"
+    "CREATE TABLE IF NOT EXISTS cars (id INTEGER PRIMARY KEY AUTOINCREMENT, brand TEXT, model TEXT, color TEXT, year INTEGER);"
   );
 });
 
@@ -33,7 +35,7 @@ app.get("/cars/:id", (req, res) => {
     if (err) {
       res.status(500).json({ error: err.message });
     } else if (!row) {
-      res.status(404).json({ error: "car not found" });
+      res.status(404).json({ error: "No Car Found" });
     } else {
       res.json(row);
     }
@@ -43,9 +45,6 @@ app.get("/cars/:id", (req, res) => {
 //POST
 app.post("/cars", (req, res) => {
   const { brand, model, color, year } = req.body;
-  if (!brand) {
-    return res.status(400).json({ error: "Brand is required" });
-  }
   db.run(
     "INSERT INTO cars (brand, model, color, year) VALUES (?, ?, ?, ?)",
     [brand, model, color, year],
@@ -63,9 +62,6 @@ app.post("/cars", (req, res) => {
 app.put("/cars/:id", (res, req) => {
   const { id } = req.params.id;
   const { brand, model, color, year } = req.body;
-  if (!brand) {
-    return res.status(400).json({ error: "No Brand Given" });
-  }
   db.run(
     "UPDATE cars SET brand = ?, model = ?, color = ?, year = ? WHERE id = ?",
     [brand, model, color, year, id],
@@ -85,9 +81,6 @@ app.put("/cars/:id", (res, req) => {
 app.delete("/cars/:id", (req, res) => {
   const { id } = req.params.id;
   const { brand, model, color, year } = req.body;
-  if (!brand) {
-    return res.status(400).json({ error: "No Brand Given" });
-  }
   db.run(
     "DELETE cars SET brand = ?, model = ?, color = ?, year =? WHERE id = ?",
     [brand, model, color, year],
@@ -102,3 +95,4 @@ app.delete("/cars/:id", (req, res) => {
     }
   );
 });
+
