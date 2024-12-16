@@ -60,7 +60,7 @@ app.put("./cars/:id", (res, req) => {
   const { id } = req.params.id;
   const { brand, model, color, year } = req.body;
   if (!brand) {
-    return res.status(400).json({ error: "Brand is required" });
+    return res.status(400).json({ error: "No Brand Given" });
   }
   db.run(
     "UPDATE cars SET brand = ?, model = ?, color = ?, year = ? WHERE id = ?",
@@ -79,5 +79,21 @@ app.put("./cars/:id", (res, req) => {
 
 app.delete("./cars/:id", (req, res) => {
     const {id} = req.params.id;
-    
+    const { brand, model, color, year} = req.body;
+    if (!brand) {
+        return res.status(400).json({ error: "No Brand Given"})
+    }
+    db.run(
+        "DELETE cars SET brand = ?, model = ?, color = ?, year =? WHERE id = ?", [brand, model, color, year],
+        function (err) {
+            if (err) {
+                res.status(500).json({error: err.message})
+            }
+            else if (this.changes === 0) {
+                res.status(201).json({ id: this.lastID})
+            } else {
+                res.status(400).json({error: err.message})
+            }
+        }
+    )
 })
