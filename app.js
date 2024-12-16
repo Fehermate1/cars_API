@@ -14,7 +14,7 @@ db.serialize(() => {
     "CREATE TABLE IF NOT EXISTS cars (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, brand TEXT NOT NULL, model TEXT, color TEXT, year INTEGER);"
   );
 });
-
+//GET ALL
 app.get("./cars", (req, res) => {
   db.all("SELECT * FROM cars", [], (err, rows) => {
     if (err) {
@@ -24,7 +24,20 @@ app.get("./cars", (req, res) => {
     }
   });
 });
-
+//GET BY id
+app.get("./cars/:id", (req, res) => {
+    const { id } = req.params.id;
+    db.get("SELECT * FROM cars WHERE id = ?", [id], (err, row) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else if (!row) {
+        res.status(404).json({ error: "car not found" });
+      } else {
+        res.json(row);
+      }
+    });
+  });
+//POST
 app.post("./cars", (req, res) => {
   const { brand, model, color, year } = req.body;
   if (!brand) {
@@ -43,19 +56,7 @@ app.post("./cars", (req, res) => {
   );
 });
 
-app.get("./cars/:id", (req, res) => {
-  const { id } = req.params.id;
-  db.get("SELECT * FROM cars WHERE id = ?", [id], (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-    } else if (!row) {
-      res.status(404).json({ error: "car not found" });
-    } else {
-      res.json(row);
-    }
-  });
-});
-
+//PUT
 app.put("./cars/:id", (res, req) => {
   const { id } = req.params.id;
   const { brand, model, color, year } = req.body;
@@ -77,6 +78,7 @@ app.put("./cars/:id", (res, req) => {
   );
 });
 
+//DELETE
 app.delete("./cars/:id", (req, res) => {
     const {id} = req.params.id;
     const { brand, model, color, year} = req.body;
@@ -96,4 +98,4 @@ app.delete("./cars/:id", (req, res) => {
             }
         }
     )
-})
+});
